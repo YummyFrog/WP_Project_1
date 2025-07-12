@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Hard Game Page</title>
+  <style>
+    body {
+      background-color: #fff;
+      font-family: Arial, sans-serif;
+      color: #000;
+      margin: 0;
+      padding: 10px;
+    }
+    h1 {
+      text-align: center;
+      border-bottom: 2px solid #000;
+      padding: 10px;
+    }
+    .top-bar {
+      display: flex;
+      justify-content: space-between;
+      margin: 10px;
+      border-bottom: 1px solid #000;
+      padding-bottom: 5px;
+    }
+    .grid {
+      border: 2px solid #000;
+      margin: 20px auto;
+      width: 500px;
+      height: 500px;
+      display: grid;
+      grid-template-columns: repeat(10, 1fr);
+      grid-template-rows: repeat(10, 1fr);
+    }
+    .grid p {
+      grid-column: 1 / -1;
+      text-align: center;
+      color: #000;
+    }
+    .side-panel {
+      margin: 20px;
+      border: 2px solid #000;
+      padding: 10px;
+    }
+    .button {
+      display: inline-block;
+      border: 2px solid #000;
+      padding: 10px 20px;
+      text-decoration: none;
+      color: #000;
+      margin-top: 10px;
+    }
+  </style>
+</head>
+<body>
+  <h1>HARD GAME PAGE</h1>
+  <div class="top-bar">
+    <a class="button" href="menu.html">← Back to Menu</a>
+    <span>Guide grid & automatic piece assignment</span>
+  </div>
+
+  <div class="grid">
+    <p>Picture of hard board</p>
+  </div>
+
+  <div class="side-panel">
+    <div style="border: 1px solid #000; padding:10px; margin-bottom:10px;">Pictures of 4 player pieces</div>
+    <div style="border: 1px solid #000; padding:10px; margin-bottom:10px;">Dice (CSS)</div>
+    <a class="button" href="#">ROLL</a>
+  </div>
+
+  <a class="button" href="menu.html">SAVE GAME</a>
+</body>
+</html>

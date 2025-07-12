@@ -1,9 +1,18 @@
+<?php
+session_start();
+if (!isset($_SESSION['email'])) {
+    // Not logged in
+    header('Location: login.html');
+    exit();
+}
+?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
   <title>Menu Page</title>
   <style>
+    * { box-sizing: border-box; }
     body {
       background-color: #fff;
       font-family: Arial, sans-serif;
@@ -49,11 +58,11 @@
       margin-top: 20px;
     }
     .logout {
+      display: inline-block;
       border: 2px solid #000;
       padding: 10px 20px;
       text-decoration: none;
       color: #000;
-      display: inline-block;
       margin-top: 20px;
     }
   </style>
@@ -70,4 +79,23 @@
       </div>
       <div>
         <div class="box">Picture</div>
-        <a class="butto
+        <a class="button" href="easy.html">CONTINUE LAST GAME</a>
+      </div>
+    </div>
+
+    <div id="new-game-options" class="section">
+      <h3>NUMBER OF PLAYERS</h3>
+      <a class="button" href="#">1</a>
+      <a class="button" href="#">2</a>
+      <a class="button" href="#">3</a>
+      <a class="button" href="#">4</a>
+      <br><br>
+      <a class="button" href="easy.html">EASY</a>
+      <a class="button" href="hard.html">HARD</a>
+      <p><small>Will only show up when the player clicks new game</small></p>
+    </div>
+
+    <a class="logout" href="logout.php">LOGOUT</a>
+  </div>
+</body>
+</html>
