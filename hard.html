@@ -15,6 +15,17 @@
       border-bottom: 2px solid #000;
       padding: 10px;
     }
+    .top-buttons {
+      text-align: center;
+      margin-bottom: 10px;
+    }
+    .top-buttons button {
+      border: 2px solid #000;
+      background: #fff;
+      padding: 8px 16px;
+      margin: 5px;
+      cursor: pointer;
+    }
     .turn-info, #win-message {
       text-align: center;
       margin-top: 10px;
@@ -104,6 +115,10 @@
   </style>
 </head>
 <body>
+  <div class="top-buttons">
+    <button id="backBtn">Back to Menu</button>
+    <button id="saveBtn">Save Game</button>
+  </div>
   <h1>Hard Game Board</h1>
   <div class="turn-info" id="turn-info"></div>
   <div class="board-wrapper">
@@ -120,12 +135,24 @@
   <script>
     const urlParams = new URLSearchParams(window.location.search);
     const numPlayers = parseInt(urlParams.get('players')) || 1;
+    const loadParam = urlParams.get('load');
 
     const playerColors = ['red', 'blue', 'green', 'purple'];
     let playerPositions = Array(numPlayers).fill(0);
     let currentPlayer = 0;
     let gameOver = false;
     let isRolling = false;
+
+    // Load saved game only if ?load=true
+    const saveKey = 'hardGameSave';
+    if (loadParam === 'true') {
+      const savedData = JSON.parse(localStorage.getItem(saveKey));
+      if (savedData && savedData.numPlayers === numPlayers) {
+        playerPositions = savedData.playerPositions;
+        currentPlayer = savedData.currentPlayer;
+        alert('Loaded saved game!');
+      }
+    }
 
     const board = document.getElementById('board');
     const overlay = document.getElementById('overlay');
@@ -134,7 +161,7 @@
     const winMessage = document.getElementById('win-message');
     const diceEl = document.getElementById('dice');
 
-    // Hard mode: 5 snakes, 3 ladders
+    // Hard mode snakes and ladders
     const snakes = {
       17: 7,
       54: 34,
@@ -255,6 +282,22 @@
         }
       });
     }
+
+    // Back to Menu
+    document.getElementById('backBtn').addEventListener('click', () => {
+      window.location.href = 'menu.php';
+    });
+
+    // Save Game
+    document.getElementById('saveBtn').addEventListener('click', () => {
+      const saveData = {
+        playerPositions,
+        currentPlayer,
+        numPlayers
+      };
+      localStorage.setItem('hardGameSave', JSON.stringify(saveData));
+      alert('Game saved!');
+    });
   </script>
 </body>
 </html>

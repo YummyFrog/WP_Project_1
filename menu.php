@@ -17,41 +17,52 @@ if (!isset($_SESSION['email'])) {
       font-family: Arial, sans-serif;
       color: #000;
       margin: 0;
-      padding: 20px;
+      padding: 0;
     }
     h1 {
       text-align: center;
       border-bottom: 2px solid #000;
-      padding: 10px;
+      padding: 15px;
+      margin: 0;
     }
     .container {
-      max-width: 800px;
+      max-width: 900px;
       margin: 20px auto;
-      text-align: center;
       border: 2px solid #000;
       padding: 20px;
+      text-align: center;
     }
-    .game-options {
+    h2 {
+      margin-top: 0;
+      margin-bottom: 20px;
+    }
+    .game-top {
       display: flex;
       justify-content: space-around;
-      margin-bottom: 30px;
+      align-items: center;
+      margin-bottom: 20px;
     }
-    .box {
+    .picture-box {
       border: 2px solid #000;
       width: 150px;
       height: 100px;
-      margin: auto;
       line-height: 100px;
+      text-align: center;
       margin-bottom: 10px;
+    }
+    .game-buttons {
+      display: flex;
+      justify-content: space-around;
     }
     .button {
       display: inline-block;
       border: 2px solid #000;
       padding: 10px 20px;
+      margin: 5px;
       text-decoration: none;
       color: #000;
-      margin: 5px;
       cursor: pointer;
+      background-color: #fff;
     }
     .selected {
       background-color: #ccc;
@@ -61,14 +72,17 @@ if (!isset($_SESSION['email'])) {
       border: 2px dashed #000;
       padding: 15px;
       margin-top: 20px;
+      text-align: center;
     }
     .logout {
-      display: inline-block;
+      display: block;
       border: 2px solid #000;
-      padding: 10px 20px;
+      width: 150px;
+      margin: 30px auto 0;
+      padding: 10px 0;
       text-decoration: none;
       color: #000;
-      margin-top: 20px;
+      text-align: center;
     }
   </style>
 </head>
@@ -77,18 +91,18 @@ if (!isset($_SESSION['email'])) {
   <div class="container">
     <h2>PICK YOUR POISON...</h2>
 
-    <div class="game-options">
+    <div class="game-top">
       <div>
-        <div class="box">Picture</div>
+        <div class="picture-box">Picture</div>
         <button class="button" id="newGameBtn">NEW GAME</button>
       </div>
       <div>
-        <div class="box">Picture</div>
-        <a class="button" href="#">CONTINUE LAST GAME</a>
+        <div class="picture-box">Picture</div>
+        <button class="button" id="continueBtn">CONTINUE LAST GAME</button>
       </div>
     </div>
 
-    <div id="new-game-options" class="section">
+    <div class="section">
       <h3>NUMBER OF PLAYERS</h3>
       <div id="players">
         <button class="button" data-value="1">1</button>
@@ -113,7 +127,7 @@ if (!isset($_SESSION['email'])) {
     let selectedPlayers = null;
     let selectedDifficulty = null;
 
-    // Highlight on select
+    // Selection highlighting
     document.querySelectorAll('#players .button').forEach(btn => {
       btn.addEventListener('click', () => {
         document.querySelectorAll('#players .button').forEach(b => b.classList.remove('selected'));
@@ -135,9 +149,43 @@ if (!isset($_SESSION['email'])) {
         alert("Please select number of players and difficulty!");
         return;
       }
-
       const targetPage = selectedDifficulty + ".html?players=" + selectedPlayers;
       window.location.href = targetPage;
+    });
+
+    // CONTINUE LAST GAME
+    document.getElementById('continueBtn').addEventListener('click', () => {
+      const easySave = localStorage.getItem('easyGameSave');
+      const hardSave = localStorage.getItem('hardGameSave');
+
+      if (!easySave && !hardSave) {
+        alert("No saved games found!");
+        return;
+      }
+
+      if (easySave && !hardSave) {
+        const data = JSON.parse(easySave);
+        window.location.href = `easy.html?players=${data.numPlayers}&load=true`;
+        return;
+      }
+
+      if (!easySave && hardSave) {
+        const data = JSON.parse(hardSave);
+        window.location.href = `hard.html?players=${data.numPlayers}&load=true`;
+        return;
+      }
+
+      // If both saves exist, ask user which one
+      const choice = prompt("You have saves for both Easy and Hard.\nType 'easy' or 'hard' to choose.");
+      if (choice && choice.toLowerCase() === 'easy') {
+        const data = JSON.parse(easySave);
+        window.location.href = `easy.html?players=${data.numPlayers}&load=true`;
+      } else if (choice && choice.toLowerCase() === 'hard') {
+        const data = JSON.parse(hardSave);
+        window.location.href = `hard.html?players=${data.numPlayers}&load=true`;
+      } else {
+        alert("No valid choice made. Cancelled.");
+      }
     });
   </script>
 </body>
