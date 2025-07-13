@@ -2,73 +2,237 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Hard Game Page</title>
+  <title>Hard Game Board</title>
   <style>
     body {
       background-color: #fff;
       font-family: Arial, sans-serif;
       color: #000;
-      margin: 0;
-      padding: 10px;
+      margin: 20px;
     }
     h1 {
       text-align: center;
       border-bottom: 2px solid #000;
       padding: 10px;
     }
-    .top-bar {
-      display: flex;
-      justify-content: space-between;
-      margin: 10px;
-      border-bottom: 1px solid #000;
-      padding-bottom: 5px;
-    }
-    .grid {
-      border: 2px solid #000;
-      margin: 20px auto;
+    .board-wrapper {
+      position: relative;
       width: 500px;
       height: 500px;
+      margin: 20px auto;
+      border: 2px solid #000;
+    }
+    .board {
       display: grid;
-      grid-template-columns: repeat(10, 1fr);
-      grid-template-rows: repeat(10, 1fr);
+      grid-template-columns: repeat(10, 50px);
+      grid-template-rows: repeat(10, 50px);
+      width: 500px;
+      height: 500px;
+      position: absolute;
+      top: 0;
+      left: 0;
+      z-index: 1;
     }
-    .grid p {
-      grid-column: 1 / -1;
-      text-align: center;
-      color: #000;
+    .square {
+      border: 1px solid #000;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      position: relative;
     }
-    .side-panel {
-      margin: 20px;
+    .player {
+      position: absolute;
+      width: 30px;
+      height: 30px;
+      background-color: red;
+      border-radius: 50%;
+    }
+    svg {
+      position: absolute;
+      top: 0;
+      left: 0;
+      z-index: 2;
+      width: 500px;
+      height: 500px;
+      pointer-events: none;
+    }
+    .dice-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      margin-top: 20px;
+    }
+    .dice {
+      width: 80px;
+      height: 80px;
       border: 2px solid #000;
-      padding: 10px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-size: 36px;
+      cursor: pointer;
+      transition: transform 0.3s;
+      user-select: none;
     }
-    .button {
-      display: inline-block;
-      border: 2px solid #000;
-      padding: 10px 20px;
-      text-decoration: none;
-      color: #000;
+    .dice.rolling {
+      animation: roll 1s ease;
+    }
+    @keyframes roll {
+      0%   { transform: rotate(0deg); }
+      25%  { transform: rotate(90deg); }
+      50%  { transform: rotate(180deg); }
+      75%  { transform: rotate(270deg); }
+      100% { transform: rotate(360deg); }
+    }
+    #roll-result {
       margin-top: 10px;
+      font-size: 18px;
+    }
+    #win-message {
+      margin-top: 20px;
+      font-size: 24px;
+      color: green;
+      font-weight: bold;
     }
   </style>
 </head>
 <body>
-  <h1>HARD GAME PAGE</h1>
-  <div class="top-bar">
-    <a class="button" href="menu.html">← Back to Menu</a>
-    <span>Guide grid & automatic piece assignment</span>
+  <h1>Hard Game Board</h1>
+  <div class="board-wrapper">
+    <svg id="overlay"></svg>
+    <div class="board" id="board"></div>
   </div>
 
-  <div class="grid">
-    <p>Picture of hard board</p>
+  <div class="dice-container">
+    <div id="dice" class="dice">ROLL</div>
+    <div id="roll-result">Number Rolled: -</div>
+    <div id="win-message"></div>
   </div>
 
-  <div class="side-panel">
-    <div style="border: 1px solid #000; padding:10px; margin-bottom:10px;">Pictures of 4 player pieces</div>
-    <div style="border: 1px solid #000; padding:10px; margin-bottom:10px;">Dice (CSS)</div>
-    <a class="button" href="#">ROLL</a>
-  </div>
+  <script>
+    const board = document.getElementById('board');
+    const overlay = document.getElementById('overlay');
+    const squares = [];
+    let playerPosition = 0;
+    let isRolling = false;
+    let gameOver = false;
 
-  <a class="button" href="menu.html">SAVE GAME</a>
+    // ✅ Hard Mode Snakes (HEAD ➜ TAIL)
+    const snakes = {
+      17: 7,
+      54: 34,
+      62: 19,
+      87: 24,
+      93: 73
+    };
+
+    // ✅ Hard Mode Ladders (BOTTOM ➜ TOP)
+    const ladders = {
+      4: 25,
+      20: 59,
+      36: 78
+    };
+
+    const squareCenters = {};
+
+    // ✅ Build grid from top to bottom visually but numbered bottom to top
+    for (let visualRow = 0; visualRow < 10; visualRow++) {
+      const actualRow = 9 - visualRow;
+      let rowNumbers = [];
+      const startNum = actualRow * 10 + 1;
+
+      for (let i = 0; i < 10; i++) {
+        rowNumbers.push(startNum + i);
+      }
+
+      if (actualRow % 2 === 1) {
+        rowNumbers.reverse();
+      }
+
+      rowNumbers.forEach((num, colIndex) => {
+        const x = colIndex * 50 + 25;
+        const y = visualRow * 50 + 25;
+        squareCenters[num] = { x, y };
+
+        const square = document.createElement('div');
+        square.className = 'square';
+        square.setAttribute('data-num', num);
+        square.textContent = num;
+        board.appendChild(square);
+        squares.push(square);
+      });
+    }
+
+    // ✅ Draw snakes (red) and ladders (green)
+    Object.entries(snakes).forEach(([head, tail]) => {
+      drawLine(squareCenters[head], squareCenters[tail], 'red');
+    });
+    Object.entries(ladders).forEach(([bottom, top]) => {
+      drawLine(squareCenters[bottom], squareCenters[top], 'green');
+    });
+
+    function drawLine(start, end, color) {
+      const line = document.createElementNS("http://www.w3.org/2000/svg", "line");
+      line.setAttribute('x1', start.x);
+      line.setAttribute('y1', start.y);
+      line.setAttribute('x2', end.x);
+      line.setAttribute('y2', end.y);
+      line.setAttribute('stroke', color);
+      line.setAttribute('stroke-width', 4);
+      line.setAttribute('stroke-linecap', 'round');
+      overlay.appendChild(line);
+    }
+
+    const diceEl = document.getElementById('dice');
+    diceEl.addEventListener('click', () => {
+      if (isRolling || gameOver) return;
+      isRolling = true;
+      diceEl.classList.add('rolling');
+      document.getElementById('roll-result').textContent = 'Rolling...';
+
+      setTimeout(() => {
+        const roll = Math.floor(Math.random() * 6) + 1;
+        diceEl.classList.remove('rolling');
+        diceEl.textContent = roll;
+        document.getElementById('roll-result').textContent = `Number Rolled: ${roll}`;
+        movePlayer(roll);
+        isRolling = false;
+      }, 1000);
+    });
+
+    function movePlayer(steps) {
+      if (gameOver) return;
+
+      playerPosition += steps;
+      if (playerPosition > 100) playerPosition = 100;
+
+      // Check for snake heads
+      if (snakes[playerPosition] !== undefined) {
+        playerPosition = snakes[playerPosition];
+      }
+      // Check for ladder bottoms
+      else if (ladders[playerPosition] !== undefined) {
+        playerPosition = ladders[playerPosition];
+      }
+
+      // Check win
+      if (playerPosition >= 100) {
+        playerPosition = 100;
+        gameOver = true;
+        document.getElementById('win-message').textContent = "🎉 You Win! 🎉";
+        diceEl.style.pointerEvents = "none";
+      }
+
+      document.querySelectorAll('.player').forEach(p => p.remove());
+      if (playerPosition > 0 && playerPosition <= 100) {
+        const target = squares.find(sq => parseInt(sq.getAttribute('data-num')) === playerPosition);
+        if (target) {
+          const piece = document.createElement('div');
+          piece.className = 'player';
+          target.appendChild(piece);
+        }
+      }
+    }
+  </script>
 </body>
 </html>

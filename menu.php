@@ -1,7 +1,6 @@
 <?php
 session_start();
 if (!isset($_SESSION['email'])) {
-    // Not logged in
     header('Location: login.html');
     exit();
 }
@@ -43,6 +42,7 @@ if (!isset($_SESSION['email'])) {
       height: 100px;
       margin: auto;
       line-height: 100px;
+      margin-bottom: 10px;
     }
     .button {
       display: inline-block;
@@ -51,6 +51,11 @@ if (!isset($_SESSION['email'])) {
       text-decoration: none;
       color: #000;
       margin: 5px;
+      cursor: pointer;
+    }
+    .selected {
+      background-color: #ccc;
+      font-weight: bold;
     }
     .section {
       border: 2px dashed #000;
@@ -75,27 +80,65 @@ if (!isset($_SESSION['email'])) {
     <div class="game-options">
       <div>
         <div class="box">Picture</div>
-        <a class="button" href="#new-game-options">NEW GAME</a>
+        <button class="button" id="newGameBtn">NEW GAME</button>
       </div>
       <div>
         <div class="box">Picture</div>
-        <a class="button" href="easy.html">CONTINUE LAST GAME</a>
+        <a class="button" href="#">CONTINUE LAST GAME</a>
       </div>
     </div>
 
     <div id="new-game-options" class="section">
       <h3>NUMBER OF PLAYERS</h3>
-      <a class="button" href="#">1</a>
-      <a class="button" href="#">2</a>
-      <a class="button" href="#">3</a>
-      <a class="button" href="#">4</a>
-      <br><br>
-      <a class="button" href="easy.html">EASY</a>
-      <a class="button" href="hard.html">HARD</a>
-      <p><small>Will only show up when the player clicks new game</small></p>
+      <div id="players">
+        <button class="button" data-value="1">1</button>
+        <button class="button" data-value="2">2</button>
+        <button class="button" data-value="3">3</button>
+        <button class="button" data-value="4">4</button>
+      </div>
+
+      <h3>DIFFICULTY</h3>
+      <div id="difficulty">
+        <button class="button" data-value="easy">EASY</button>
+        <button class="button" data-value="hard">HARD</button>
+      </div>
+
+      <p><small>Select number of players and difficulty before starting a new game.</small></p>
     </div>
 
     <a class="logout" href="logout.php">LOGOUT</a>
   </div>
+
+  <script>
+    let selectedPlayers = null;
+    let selectedDifficulty = null;
+
+    // Highlight on select
+    document.querySelectorAll('#players .button').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('#players .button').forEach(b => b.classList.remove('selected'));
+        btn.classList.add('selected');
+        selectedPlayers = btn.getAttribute('data-value');
+      });
+    });
+
+    document.querySelectorAll('#difficulty .button').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('#difficulty .button').forEach(b => b.classList.remove('selected'));
+        btn.classList.add('selected');
+        selectedDifficulty = btn.getAttribute('data-value');
+      });
+    });
+
+    document.getElementById('newGameBtn').addEventListener('click', () => {
+      if (!selectedPlayers || !selectedDifficulty) {
+        alert("Please select number of players and difficulty!");
+        return;
+      }
+
+      const targetPage = selectedDifficulty + ".html?players=" + selectedPlayers;
+      window.location.href = targetPage;
+    });
+  </script>
 </body>
 </html>
