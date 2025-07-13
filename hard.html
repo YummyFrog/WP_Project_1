@@ -15,6 +15,12 @@
       border-bottom: 2px solid #000;
       padding: 10px;
     }
+    .turn-info, #win-message {
+      text-align: center;
+      margin-top: 10px;
+      font-size: 20px;
+      font-weight: bold;
+    }
     .board-wrapper {
       position: relative;
       width: 500px;
@@ -39,13 +45,14 @@
       justify-content: center;
       align-items: center;
       position: relative;
+      font-size: 12px;
     }
     .player {
       position: absolute;
-      width: 30px;
-      height: 30px;
-      background-color: red;
+      width: 20px;
+      height: 20px;
       border-radius: 50%;
+      border: 2px solid #000;
     }
     svg {
       position: absolute;
@@ -98,6 +105,7 @@
 </head>
 <body>
   <h1>Hard Game Board</h1>
+  <div class="turn-info" id="turn-info"></div>
   <div class="board-wrapper">
     <svg id="overlay"></svg>
     <div class="board" id="board"></div>
@@ -110,32 +118,39 @@
   </div>
 
   <script>
+    const urlParams = new URLSearchParams(window.location.search);
+    const numPlayers = parseInt(urlParams.get('players')) || 1;
+
+    const playerColors = ['red', 'blue', 'green', 'purple'];
+    let playerPositions = Array(numPlayers).fill(0);
+    let currentPlayer = 0;
+    let gameOver = false;
+    let isRolling = false;
+
     const board = document.getElementById('board');
     const overlay = document.getElementById('overlay');
-    const squares = [];
-    let playerPosition = 0;
-    let isRolling = false;
-    let gameOver = false;
+    const turnInfo = document.getElementById('turn-info');
+    const rollResult = document.getElementById('roll-result');
+    const winMessage = document.getElementById('win-message');
+    const diceEl = document.getElementById('dice');
 
-    // ✅ Hard Mode Snakes (HEAD ➜ TAIL)
+    // Hard mode: 5 snakes, 3 ladders
     const snakes = {
       17: 7,
       54: 34,
       62: 19,
       87: 24,
-      93: 73
+      99: 78
     };
-
-    // ✅ Hard Mode Ladders (BOTTOM ➜ TOP)
     const ladders = {
-      4: 25,
-      20: 59,
-      36: 78
+      4: 14,
+      28: 48,
+      40: 59
     };
 
+    const squares = [];
     const squareCenters = {};
 
-    // ✅ Build grid from top to bottom visually but numbered bottom to top
     for (let visualRow = 0; visualRow < 10; visualRow++) {
       const actualRow = 9 - visualRow;
       let rowNumbers = [];
@@ -144,10 +159,7 @@
       for (let i = 0; i < 10; i++) {
         rowNumbers.push(startNum + i);
       }
-
-      if (actualRow % 2 === 1) {
-        rowNumbers.reverse();
-      }
+      if (actualRow % 2 === 1) rowNumbers.reverse();
 
       rowNumbers.forEach((num, colIndex) => {
         const x = colIndex * 50 + 25;
@@ -163,7 +175,6 @@
       });
     }
 
-    // ✅ Draw snakes (red) and ladders (green)
     Object.entries(snakes).forEach(([head, tail]) => {
       drawLine(squareCenters[head], squareCenters[tail], 'red');
     });
@@ -183,18 +194,20 @@
       overlay.appendChild(line);
     }
 
-    const diceEl = document.getElementById('dice');
+    updateTurnDisplay();
+    renderPlayers();
+
     diceEl.addEventListener('click', () => {
       if (isRolling || gameOver) return;
       isRolling = true;
       diceEl.classList.add('rolling');
-      document.getElementById('roll-result').textContent = 'Rolling...';
+      rollResult.textContent = 'Rolling...';
 
       setTimeout(() => {
         const roll = Math.floor(Math.random() * 6) + 1;
         diceEl.classList.remove('rolling');
         diceEl.textContent = roll;
-        document.getElementById('roll-result').textContent = `Number Rolled: ${roll}`;
+        rollResult.textContent = `Number Rolled: ${roll}`;
         movePlayer(roll);
         isRolling = false;
       }, 1000);
@@ -202,36 +215,45 @@
 
     function movePlayer(steps) {
       if (gameOver) return;
+      let pos = playerPositions[currentPlayer] + steps;
+      if (pos > 100) pos = 100;
 
-      playerPosition += steps;
-      if (playerPosition > 100) playerPosition = 100;
+      if (snakes[pos]) pos = snakes[pos];
+      else if (ladders[pos]) pos = ladders[pos];
 
-      // Check for snake heads
-      if (snakes[playerPosition] !== undefined) {
-        playerPosition = snakes[playerPosition];
-      }
-      // Check for ladder bottoms
-      else if (ladders[playerPosition] !== undefined) {
-        playerPosition = ladders[playerPosition];
-      }
+      playerPositions[currentPlayer] = pos;
 
-      // Check win
-      if (playerPosition >= 100) {
-        playerPosition = 100;
+      if (pos === 100) {
         gameOver = true;
-        document.getElementById('win-message').textContent = "🎉 You Win! 🎉";
+        winMessage.textContent = `🎉 Player ${currentPlayer + 1} Wins! 🎉`;
         diceEl.style.pointerEvents = "none";
       }
 
-      document.querySelectorAll('.player').forEach(p => p.remove());
-      if (playerPosition > 0 && playerPosition <= 100) {
-        const target = squares.find(sq => parseInt(sq.getAttribute('data-num')) === playerPosition);
-        if (target) {
-          const piece = document.createElement('div');
-          piece.className = 'player';
-          target.appendChild(piece);
-        }
+      renderPlayers();
+
+      if (!gameOver) {
+        currentPlayer = (currentPlayer + 1) % numPlayers;
+        updateTurnDisplay();
       }
+    }
+
+    function updateTurnDisplay() {
+      turnInfo.textContent = `Player ${currentPlayer + 1}'s Turn (${playerColors[currentPlayer]})`;
+    }
+
+    function renderPlayers() {
+      document.querySelectorAll('.player').forEach(p => p.remove());
+      playerPositions.forEach((pos, idx) => {
+        if (pos > 0 && pos <= 100) {
+          const target = squares.find(sq => parseInt(sq.getAttribute('data-num')) === pos);
+          if (target) {
+            const piece = document.createElement('div');
+            piece.className = 'player';
+            piece.style.backgroundColor = playerColors[idx];
+            target.appendChild(piece);
+          }
+        }
+      });
     }
   </script>
 </body>
