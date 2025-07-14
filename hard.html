@@ -5,40 +5,78 @@
   <title>Hard Game Board</title>
   <style>
     body {
-      background-color: #fff;
+      background: url('menubg.png') no-repeat center center fixed;
+      background-size: cover;
       font-family: Arial, sans-serif;
-      color: #000;
-      margin: 20px;
+      color: #fff;
+      margin: 0;
+      padding: 20px;
+      min-height: 100vh;
     }
+    
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+    
+    .back-btn {
+      background: transparent;
+      border: 3px solid #fff;
+      color: #fff;
+      padding: 10px 20px;
+      font-size: 18px;
+      cursor: pointer;
+      border-radius: 5px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      text-shadow: 2px 2px 4px rgba(0,0,0,0.8);
+    }
+    
+    .back-btn:hover {
+      background: rgba(255,255,255,0.2);
+    }
+    
+    .game-container {
+      display: flex;
+      gap: 20px;
+      justify-content: center;
+      align-items: flex-start;
+    }
+    
+    .main-board {
+      background: rgba(255,255,255,0.95);
+      border-radius: 10px;
+      padding: 20px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+    }
+    
     h1 {
       text-align: center;
-      border-bottom: 2px solid #000;
-      padding: 10px;
+      color: #000;
+      margin: 0 0 20px 0;
+      font-size: 24px;
     }
-    .top-buttons {
+    
+    .turn-info {
       text-align: center;
-      margin-bottom: 10px;
-    }
-    .top-buttons button {
-      border: 2px solid #000;
-      background: #fff;
-      padding: 8px 16px;
-      margin: 5px;
-      cursor: pointer;
-    }
-    .turn-info, #win-message {
-      text-align: center;
-      margin-top: 10px;
+      margin-bottom: 20px;
       font-size: 20px;
       font-weight: bold;
+      color: #000;
     }
+    
     .board-wrapper {
       position: relative;
       width: 500px;
       height: 500px;
-      margin: 20px auto;
-      border: 2px solid #000;
+      border: 3px solid #000;
+      border-radius: 10px;
+      overflow: hidden;
     }
+    
     .board {
       display: grid;
       grid-template-columns: repeat(10, 50px);
@@ -49,7 +87,9 @@
       top: 0;
       left: 0;
       z-index: 1;
+      background: #fff;
     }
+    
     .square {
       border: 1px solid #000;
       display: flex;
@@ -57,14 +97,18 @@
       align-items: center;
       position: relative;
       font-size: 12px;
+      font-weight: bold;
     }
+    
     .player {
       position: absolute;
       width: 20px;
       height: 20px;
       border-radius: 50%;
       border: 2px solid #000;
+      z-index: 10;
     }
+    
     svg {
       position: absolute;
       top: 0;
@@ -74,27 +118,80 @@
       height: 500px;
       pointer-events: none;
     }
-    .dice-container {
+    
+    .right-panel {
       display: flex;
       flex-direction: column;
-      align-items: center;
-      margin-top: 20px;
+      gap: 20px;
     }
+    
+    .player-pieces {
+      background: #FFD700;
+      border: 3px solid #000;
+      border-radius: 10px;
+      padding: 20px;
+      text-align: center;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+    }
+    
+    .piece-display {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      align-items: center;
+    }
+    
+    .piece-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      color: #000;
+      font-weight: bold;
+      text-shadow: none;
+    }
+    
+    .piece-dot {
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      border: 2px solid #000;
+    }
+    
+    .dice-container {
+      background: #FFD700;
+      border: 3px solid #000;
+      border-radius: 10px;
+      padding: 20px;
+      text-align: center;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+    }
+    
     .dice {
       width: 80px;
       height: 80px;
-      border: 2px solid #000;
+      border: 3px solid #000;
+      background: #000;
+      color: #fff;
       display: flex;
       justify-content: center;
       align-items: center;
-      font-size: 36px;
+      font-size: 24px;
+      font-weight: bold;
       cursor: pointer;
       transition: transform 0.3s;
       user-select: none;
+      margin: 0 auto;
+      border-radius: 5px;
     }
+    
+    .dice:hover {
+      transform: scale(1.1);
+    }
+    
     .dice.rolling {
       animation: roll 1s ease;
     }
+    
     @keyframes roll {
       0%   { transform: rotate(0deg); }
       25%  { transform: rotate(90deg); }
@@ -102,34 +199,88 @@
       75%  { transform: rotate(270deg); }
       100% { transform: rotate(360deg); }
     }
+    
     #roll-result {
-      margin-top: 10px;
-      font-size: 18px;
+      margin-top: 15px;
+      font-size: 16px;
+      color: #000;
+      text-shadow: none;
     }
+    
+    .save-game {
+      background: #FFD700;
+      border: 3px solid #000;
+      border-radius: 10px;
+      padding: 15px;
+      text-align: center;
+      cursor: pointer;
+      transition: background 0.3s;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+    }
+    
+    .save-game:hover {
+      background: #FFE55C;
+    }
+    
+    .save-game-text {
+      color: #000;
+      font-weight: bold;
+      font-size: 16px;
+      text-shadow: none;
+    }
+    
+    .save-game-desc {
+      color: #000;
+      font-size: 14px;
+      margin-top: 5px;
+      text-shadow: none;
+    }
+    
     #win-message {
+      text-align: center;
       margin-top: 20px;
       font-size: 24px;
-      color: green;
+      color: #00ff00;
       font-weight: bold;
+      text-shadow: 2px 2px 4px rgba(0,0,0,0.8);
     }
   </style>
 </head>
 <body>
-  <div class="top-buttons">
-    <button id="backBtn">Back to Menu</button>
-    <button id="saveBtn">Save Game</button>
+  <div class="header">
+    <button class="back-btn" id="backBtn">
+      <span>←</span> Back to menu
+    </button>
   </div>
-  <h1>Hard Game Board</h1>
-  <div class="turn-info" id="turn-info"></div>
-  <div class="board-wrapper">
-    <svg id="overlay"></svg>
-    <div class="board" id="board"></div>
-  </div>
-
-  <div class="dice-container">
-    <div id="dice" class="dice">ROLL</div>
-    <div id="roll-result">Number Rolled: -</div>
-    <div id="win-message"></div>
+  
+  <div class="game-container">
+    <div class="main-board">
+      <h1>Hard Game Board</h1>
+      <div class="turn-info" id="turn-info"></div>
+      <div class="board-wrapper">
+        <svg id="overlay"></svg>
+        <div class="board" id="board"></div>
+      </div>
+      <div id="win-message"></div>
+    </div>
+    
+    <div class="right-panel">
+      <div class="player-pieces">
+        <div class="piece-display" id="piece-display">
+          <!-- Player pieces will be generated here -->
+        </div>
+      </div>
+      
+      <div class="dice-container">
+        <div id="dice" class="dice">ROLL</div>
+        <div id="roll-result">Number Rolled: -</div>
+      </div>
+      
+      <div class="save-game" id="saveBtn">
+        <div class="save-game-text">SAVE GAME</div>
+        <div class="save-game-desc">Save game progress to continue later</div>
+      </div>
+    </div>
   </div>
 
   <script>
@@ -160,6 +311,7 @@
     const rollResult = document.getElementById('roll-result');
     const winMessage = document.getElementById('win-message');
     const diceEl = document.getElementById('dice');
+    const pieceDisplay = document.getElementById('piece-display');
 
     // Hard mode snakes and ladders
     const snakes = {
@@ -177,6 +329,23 @@
 
     const squares = [];
     const squareCenters = {};
+
+    // Generate player pieces display
+    for (let i = 0; i < numPlayers; i++) {
+      const pieceItem = document.createElement('div');
+      pieceItem.className = 'piece-item';
+      
+      const dot = document.createElement('div');
+      dot.className = 'piece-dot';
+      dot.style.backgroundColor = playerColors[i];
+      
+      const label = document.createElement('span');
+      label.textContent = `Player ${i + 1}`;
+      
+      pieceItem.appendChild(dot);
+      pieceItem.appendChild(label);
+      pieceDisplay.appendChild(pieceItem);
+    }
 
     for (let visualRow = 0; visualRow < 10; visualRow++) {
       const actualRow = 9 - visualRow;
